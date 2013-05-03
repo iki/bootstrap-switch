@@ -1,0 +1,54 @@
+#!/bin/sh
+#|
+#|LESS to SCSS conversion
+#|
+#|Usage: less2scss <input >output
+#|       less2scss source [target] [source-dir] [target-dir] [prefix]
+#|
+#|Rules: https://github.com/jlong/sass-twitter-bootstrap#sass-conversion-quick-tips
+#|
+
+rules=
+rules=$rules"s/@\([A-Za-z_][A-Za-z0-9_]*\)/\$\1/g;"  # @VAR  ->  $VAR
+rules=$rules"s/^\( *$[A-Za-z_][A-Za-z0-9_]*:.*\);$/\1 !default;/g;"  # @VAR: VALUE;  ->  $VAR: VALUE !default;
+rules=$rules"s/\.\([A-Za-z_][-A-Za-z0-9_]* *(.*) *{\)/@mixin \1/g;"  # .MIXIN(ARGS) {  ->  @mixin MIXIN(ARGS) {
+rules=$rules"s/#\(gradient\|grid\|font\) *> *\.\([A-Za-z_][-A-Za-z0-9_]* *(.*)\)/@include \1-\2/g;"  # #gradient|grid|font > .MIXIN(ARGS)  ->  @include gradient|grid|font-MIXIN(ARGS)
+rules=$rules"s/\.\([A-Za-z_][-A-Za-z0-9_]* *(.*)\)/@include \1/g;"  # .MIXIN(ARGS)  ->  @include MIXIN(ARGS)
+rules=$rules"s/\bfadein\((.*)\)/fade-in\1/g;"  # fadein(ARGS)  ->  fade-in(ARGS)
+rules=$rules"s/\bspin\((.*)\)/adjust-hue\1/g;"  # spin(ARGS)  ->  adjust-hue(ARGS)
+rules=$rules"s/\t/  /g;"  # TAB  ->  2 SPACES
+
+
+less2scss () {
+  [ $# -ge 1 ] || { sed "$rules"; return $?; }
+
+  [ "$1" != '--help' ] || { usage; return $?; }
+
+  source="$1"; target="$2"; source_dir="$3"; target_dir="$4"; prefix="$5"
+
+  [ -f "$source" ] || ! echo "Invalid less input file: '$source'" >&2 || return 1
+
+  if [ -z "$target" ]; then
+    # target="$target_dir${source##*/}"
+    target="$target_dir/${source#$source_dir/}"
+    target="${target%.less}.scss"
+    [ -z "$prefix" ] || target="${target%/*}/$prefix${target##*/}"
+    fi
+
+  [ "$source" != "$target" ] || ! echo "Target other than source is required: '$source'" >&2 || return 1
+
+  echo === less2scss \< "$source" \> "$target" >&2
+
+  [ -d "${target%/*}" ] || mkdir -p "${target%/*}" || exit $?
+
+  sed "$rules" < "$source" > "$target"
+  }
+
+usage () { local R S I; S="${1:-$0}"; shift; R=; for I in $@; do R="${R}s/<${I%%=*}>/${I#*=}/;"; done; sed -n "$R;/^#|/s/#|//p;" "$S"; }
+  ## Usage: usage script [var=value]
+  ## Extracts documentation from script.
+
+is_sourced () { [ -z "$0" -o "$0" = "${SHELL##*/}" -o "$0" = 'sh' ] && [ $# = 0 ]; }
+  ## Checks if current script is sourced from another script via '.' (command is empty or shell).
+
+is_sourced || ! trap 'exit 10' 1 2 3 13 15 || less2scss "$@" || exit $?

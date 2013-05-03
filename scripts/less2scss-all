@@ -1,0 +1,17 @@
+#!/bin/sh
+
+[ "$OS" = "Windows_NT" ] && CMD="${0//\\/\/}" || CMD="$0"; BIN="${CMD%/*}";
+[ "$BIN" = "$CMD" -o "$BIN" = . ] && BIN=$PWD; [ "${BIN#/}" = "$BIN" ] && BIN="$PWD/$BIN"
+
+cd "$BIN/.." || exit $?
+
+source_dir=static/less
+target_dir=static/sass
+
+main=bootstrapSwitch.less
+deps=deps/*.less
+
+for source in $source_dir/$main; do $BIN/less2scss $source "" $source_dir $target_dir || exit $?; done 
+for source in $source_dir/$deps; do $BIN/less2scss $source "" $source_dir $target_dir _ || exit $?; done 
+
+cp -uv static/stylesheets/bootstrapSwitch.css static/stylesheets/bootstrapSwitch.scss || exit $?
