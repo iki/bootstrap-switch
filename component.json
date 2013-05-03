@@ -1,0 +1,15 @@
+{
+  "name"        : "bootstrap-switch-sass",
+  "description" : "Unofficial bootstrap switch - sass+less version",
+  "version"     : "1.3.0+sass.1",
+  "main"        : "static/js/bootstrapSwitch.js",
+  "ignore": [
+    "examples",
+    "scripts"
+  ],
+  "dependencies": {
+  }
+  "scripts": [
+    "static/js/bootstrapSwitch.js"
+  ]
+}

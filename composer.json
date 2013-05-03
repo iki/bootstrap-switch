@@ -1,0 +1,32 @@
+{
+  "name"        : "iki/bootstrap-switch-sass",
+  "description" : "Unofficial bootstrap switch - sass+less version",
+  "type": "component",
+  "keywords": [
+    "JavaScript"
+  ],
+  "homepage": "http://www.larentis.eu/switch/",
+  "license": "Apache License, Version 2.0",
+  "authors": [
+    {
+      "name": "Mattia Larentis",
+      "homepage": "http://www.larentis.eu/switch/"
+    }
+  ],
+  "require": {
+  },
+  "ignore": [
+    "examples",
+    "script"
+  ],
+  "extra": {
+    "component": {
+      "scripts": [
+        "static/js/bootstrapSwitch.js"
+      ],
+      "shim": {
+        "exports": "BootstrapSwitch"
+      }
+    }
+  }
+}
